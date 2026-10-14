@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--BUILD:HEAD-START-->
+<title>FLC 2027 Phone Preview</title>
+<!--BUILD:HEAD-END-->
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+<!--BUILD:STYLE-START-->
+<style>
+/* Phone preview studio for laptops: controls on the left, a true-size phone on the right.
+   Loads the real app (index.html) in an iframe at the chosen device's viewport size. */
+@font-face { font-family: "Barlow"; font-weight: 400; src: url("assets/fonts/barlow-latin-400-normal.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Barlow"; font-weight: 600; src: url("assets/fonts/barlow-latin-600-normal.woff2") format("woff2"); font-display: swap; }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; src: url("assets/fonts/barlow-condensed-latin-700-normal.woff2") format("woff2"); font-display: swap; }
+:root {
+  --green: #86B52C; --green-700: #44701A; --green-50: #F3F8EA; --green-100: #E4F0CF;
+  --bg: #EEF2EC; --panel: #FFFFFF; --fg: #17241C; --muted: #5D6B62; --faint: #8A968E; --line: #E1E8DF;
+  --bezel: #10291B;
+  --f: "Barlow", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-num: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.45 var(--f); -webkit-font-smoothing: antialiased; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2.5px solid var(--green-700); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.studio { display: grid; grid-template-columns: 330px minmax(0, 1fr); height: 100%; }
+.panel { background: var(--panel); border-right: 1px solid var(--line); overflow-y: auto; padding: 22px 20px 28px; display: grid; gap: 22px; align-content: start; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand img { width: 34px; }
+.brand b { font-family: var(--f-num); font-size: 22px; letter-spacing: .03em; display: block; line-height: 1; }
+.brand span { font-size: 13px; color: var(--muted); }
+.group { display: grid; gap: 8px; }
+.label { font-family: var(--f-num); font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--green-700); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 0; border-radius: 999px; padding: 6px 12px; background: var(--bg); color: var(--muted); font-size: 13.5px; font-weight: 600; }
+.chip:hover { background: var(--green-50); color: var(--green-700); }
+.chip[aria-pressed="true"] { background: var(--green); color: var(--bezel); }
+select, input[type="datetime-local"] { width: 100%; min-height: 40px; border: 1.5px solid var(--line); border-radius: 10px; padding: 0 10px; background: #fff; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 0; border-radius: 999px; min-height: 38px; padding: 0 14px; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.btn--primary { background: var(--green-700); color: #fff; }
+.btn--line { background: #fff; box-shadow: inset 0 0 0 1.5px var(--line); color: var(--fg); }
+.check { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+.check input { width: 18px; height: 18px; accent-color: var(--green-700); }
+.hint { font-size: 13px; color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); background: var(--green-50); border-radius: 12px; padding: 10px 12px; line-height: 1.5; }
+.note code { font-size: 12px; background: #fff; padding: 1px 5px; border-radius: 5px; }
+.warn { background: #FFF4DA; color: #6B4600; }
+
+.stage { position: relative; overflow: hidden; display: grid; place-items: center; padding: 20px; }
+.stage__meta { position: absolute; top: 14px; left: 20px; right: 20px; display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
+.stage__meta b { color: var(--fg); font-weight: 600; }
+.holder { transform-origin: center center; }
+/* Three phone families: Dynamic Island iPhones, home-button iPhones, punch-hole Android */
+.phone { position: relative; padding: 12px; border-radius: 62px; background: var(--bezel); box-shadow: 0 0 0 2px #2A4535, 0 30px 70px rgba(16,41,27,.28), 0 8px 18px rgba(16,41,27,.18); }
+.screen { position: relative; overflow: hidden; border-radius: 50px; background: #FBFDF9; }
+/* Status bar and home indicator float over the app, like a real phone */
+.status { position: absolute; z-index: 3; left: 0; right: 0; top: 0; height: 54px; display: flex; align-items: center; justify-content: space-between; padding: 8px 32px 0 38px; font-weight: 600; font-size: 15px; color: #17241C; background: transparent; pointer-events: none; font-variant-numeric: tabular-nums; transition: color .2s ease; }
+.status.is-light { color: #fff; }
+.island { position: absolute; left: 50%; top: 11px; transform: translateX(-50%); width: 124px; height: 36px; border-radius: 20px; background: #000; }
+.sb-icons { display: flex; gap: 5px; align-items: center; }
+.sb-icons svg { width: 17px; height: 12px; }
+iframe { border: 0; display: block; background: #FBFDF9; position: absolute; inset: 0; width: 100%; height: 100%; }
+.home-ind { position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; height: 22px; display: grid; place-items: center; background: transparent; pointer-events: none; }
+.home-ind i { width: 140px; height: 5px; border-radius: 5px; background: #111; }
+.home-btn { display: none; }
+/* iPhone 7 Plus: tall bezels, square-ish screen, round home button */
+.phone--home { border-radius: 58px; padding: 78px 16px 92px; }
+.phone--home .screen { border-radius: 4px; }
+.phone--home .status { height: 20px; padding: 0 8px; font-size: 12px; }
+.phone--home .island { width: 64px; height: 6px; top: -44px; border-radius: 6px; background: #2A4535; }
+.phone--home .status { padding: 0 8px; }
+.phone--home .home-ind { display: none; }
+.phone--home .home-btn { display: block; position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); width: 56px; height: 56px; border-radius: 50%; box-shadow: inset 0 0 0 2px #2F4D3B; }
+/* Android: thin bezels, punch-hole camera, gesture bar */
+.phone--punch { border-radius: 44px; padding: 10px; }
+.phone--punch .screen { border-radius: 36px; }
+.phone--punch .status { height: 32px; padding: 2px 24px 0 26px; font-size: 13px; }
+.phone--punch .island { width: 12px; height: 12px; top: 10px; border-radius: 12px; }
+.phone--punch .home-ind { height: 16px; }
+.phone--punch .home-ind i { width: 104px; height: 4px; background: #333; }
+
+@media (max-width: 760px) {
+  .studio { grid-template-columns: 1fr; height: auto; }
+  .panel { border-right: 0; border-bottom: 1px solid var(--line); }
+  .stage { min-height: 900px; }
+}
+</style>
+<!--BUILD:STYLE-END-->
+</head>
+<body>
+<!--BUILD:BODY-START-->
+<div class="studio">
+  <aside class="panel" aria-label="Preview controls">
+    <div class="brand"><img src="assets/img/logo.svg" alt="" width="34" height="28"><div><b>FLC 2027</b><span>Phone preview</span></div></div>
+
+    <p class="note warn" id="file-warn" hidden>This page is opened as a local file, so sign-in shortcuts and auto-refresh can’t work. Open it through a local server instead (see the README, “Preview on a laptop”).</p>
+
+    <div class="group">
+      <span class="label">Device</span>
+      <div class="chips" id="devices" role="group" aria-label="Device"></div>
+    </div>
+
+    <div class="group">
+      <span class="label">Go to screen</span>
+      <div class="chips" id="screens" role="group" aria-label="Screen"></div>
+    </div>
+
+    <div class="group">
+      <span class="label">Signed in as</span>
+      <div class="chips" id="users" role="group" aria-label="User"></div>
+      <div class="row"><button type="button" class="btn btn--line" id="story">Show the welcome story</button><button type="button" class="btn btn--line" id="signout">Sign out</button></div>
+    </div>
+
+    <div class="group">
+      <label class="label" for="clock">Preview clock (Shanghai time)</label>
+      <select id="clock">
+        <option value="">As set in config/users.js</option>
+        <option value="real">Real time (now)</option>
+        <option value="2027-01-05T09:00:00+08:00">Two weeks before · countdown</option>
+        <option value="2027-01-18T18:45:00+08:00">Day 0 · Welcome Dinner</option>
+        <option value="2027-01-19T10:20:00+08:00">Day 1 · 10:20 panel</option>
+        <option value="2027-01-19T14:00:00+08:00">Day 1 · Shanghai Tobacco visit</option>
+        <option value="2027-01-20T19:30:00+08:00">Day 2 · Gala Dinner</option>
+        <option value="2027-01-21T11:45:00+08:00">Day 3 · Conference closure</option>
+        <option value="2027-01-22T09:00:00+08:00">After the conference</option>
+        <option value="custom">Custom…</option>
+      </select>
+      <input type="datetime-local" id="clock-custom" value="2027-01-19T10:20" hidden aria-label="Custom preview time">
+    </div>
+
+    <div class="group">
+      <span class="label">View</span>
+      <div class="chips" id="zoom" role="group" aria-label="Zoom">
+        <button type="button" class="chip" data-zoom="fit" aria-pressed="true">Fit window</button>
+        <button type="button" class="chip" data-zoom="1" aria-pressed="false">Actual size</button>
+      </div>
+      <label class="check" for="auto"><input type="checkbox" id="auto" checked>Refresh automatically when I save a file</label>
+      <div class="row">
+        <button type="button" class="btn btn--primary" id="reload">Reload (R)</button>
+        <button type="button" class="btn btn--line" id="reset">Clear app data</button>
+        <a class="btn btn--line" id="open" href="index.html" target="_blank" rel="noopener">Open in new tab</a>
+      </div>
+    </div>
+
+    <div class="note" id="edit-note">
+      <b>Where to edit</b><br>
+      Agenda, speakers, venues, text: <code>data/content.js</code><br>
+      Accounts and preview clock: <code>config/users.js</code><br>
+      Colours and spacing: <code>css/app.css</code><br>
+      Notices and attendees: use the Admin screen.
+    </div>
+  </aside>
+
+  <main class="stage" id="stage">
+    <div class="stage__meta"><span id="meta-device"></span><span id="meta-status"></span></div>
+    <div class="holder" id="holder">
+      <div class="phone" id="phone">
+        <div class="screen" id="screen">
+          <div class="status" id="status"><span id="sb-time">9:41</span><span class="island"></span>
+            <span class="sb-icons" aria-hidden="true">
+              <svg viewBox="0 0 17 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="5.5" width="3" height="6.5" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+              <svg viewBox="0 0 26 12"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".45"/><rect x="2" y="2" width="16" height="8" rx="1.8"/><rect x="23.5" y="4" width="2" height="4" rx="1" opacity=".45"/></svg>
+            </span>
+          </div>
+          <iframe id="frame" title="FLC 2027 app preview"></iframe>
+          <div class="home-ind"><i></i></div>
+        </div>
+        <span class="home-btn" aria-hidden="true"></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="config/users.js"></script>
+<script>
+(function () {
+  'use strict';
+  /* The phones Filtrona attendees use, plus Pixel 8 as a spare Android check.
+     w/h = browser viewport in CSS pixels; bars = status bar + bottom bar heights. */
+  var DEVICES = [
+    { id: 'iphone17pm', name: 'iPhone 17 Pro Max', w: 440, h: 956, kind: 'island', top: 54, bottom: 22 },
+    { id: 'iphone16pm', name: 'iPhone 16 Pro Max', w: 440, h: 956, kind: 'island', top: 54, bottom: 22 },
+    { id: 'iphone7p',   name: 'iPhone 7 Plus',     w: 414, h: 736, kind: 'home',   top: 20, bottom: 0 },
+    { id: 'galaxya35',  name: 'Galaxy A35',        w: 412, h: 915, kind: 'punch',  top: 32, bottom: 16 },
+    { id: 'galaxya34',  name: 'Galaxy A34',        w: 412, h: 915, kind: 'punch',  top: 32, bottom: 16 },
+    { id: 'pixel8',     name: 'Pixel 8',           w: 412, h: 915, kind: 'punch',  top: 32, bottom: 16 }
+  ];
+  var SCREENS = [['Home', 'home'], ['Agenda', 'agenda/d1'], ['Speakers', 'speakers'], ['Attendees', 'attendees'], ['Explore', 'explore'], ['Info', 'info'], ['Admin', 'admin']];
+  var USERS = window.FLC_USERS || [];
+  var $ = function (s) { return document.querySelector(s); };
+  var frame = $('#frame'), isFile = location.protocol === 'file:';
+  var APP_HTML = window.FLC_APP_HTML || null;   /* set only in the single-file build */
+  var DEF = { device: 'iphone17pm', zoom: 'fit', clock: '', custom: '2027-01-19T10:20', route: 'home', auto: true, user: '' };
+  var st = load(), live = { user: '', route: '', screen: '' }, pending = null;
+
+  function load() { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem('flc.preview2') || '{}')); } catch (e) { return Object.assign({}, DEF); } }
+  function save() { try { localStorage.setItem('flc.preview2', JSON.stringify(st)); } catch (e) {} }
+  function dev() { return DEVICES.filter(function (d) { return d.id === st.device; })[0] || DEVICES[0]; }
+  function clockValue() { if (st.clock === 'custom') return st.custom ? st.custom + ':00+08:00' : ''; return st.clock; }
+
+  /* ---------- talk to the app inside the phone (works across origins) ---------- */
+  function insets() { var d = dev(); return { top: d.top, bottom: d.bottom }; }
+  function send(msg) { try { frame.contentWindow.postMessage(Object.assign({ now: clockValue(), insets: insets() }, msg), '*'); } catch (e) {} }
+  window.addEventListener('message', function (e) {
+    if (e.source !== frame.contentWindow) return;
+    var m = e.data || {};
+    if (m.flc === 'ready') {
+      var base = { now: clockValue() };
+      if (pending) { send(Object.assign(base, pending)); pending = null; }
+      else if (st.user) send(Object.assign(base, { flc: 'signin', user: st.user, route: st.route }));
+      else send(Object.assign(base, { flc: 'clock' }));
+    }
+    if (m.flc === 'state') {
+      live = m; st.user = m.user || ''; if (m.route) st.route = m.route; save(); drawControls();
+      $('#status').classList.toggle('is-light', m.screen === 'story');
+    }
+  });
+
+  /* ---------- render controls ---------- */
+  function chips(el, items, current, attr) {
+    el.innerHTML = items.map(function (x) { return '<button type="button" class="chip" ' + attr + '="' + x[1] + '" aria-pressed="' + (x[1] === current) + '">' + x[0] + '</button>'; }).join('');
+  }
+  function drawControls() {
+    chips($('#devices'), DEVICES.map(function (d) { return [d.name, d.id]; }), st.device, 'data-dev');
+    chips($('#screens'), SCREENS, live.screen === 'app' ? (st.route || '').split('/')[0] === 'agenda' ? 'agenda/d1' : st.route : '', 'data-route');
+    chips($('#users'), [['Guest', 'Guest']].concat(USERS.map(function (u) { return [u.name, u.name]; })), st.user, 'data-user');
+    $('#clock').value = st.clock; $('#clock-custom').hidden = st.clock !== 'custom'; $('#clock-custom').value = st.custom;
+    Array.prototype.forEach.call(document.querySelectorAll('[data-zoom]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-zoom') === st.zoom)); });
+    $('#auto').checked = !!st.auto;
+    $('#file-warn').hidden = !isFile;
+    if (APP_HTML) { $('#auto').closest('label').hidden = true; $('#open').hidden = true; $('#edit-note').hidden = true; }
+  }
+
+  /* ---------- phone size and scale ---------- */
+  function layout() {
+    var d = dev(), ph = $('#phone');
+    ph.className = 'phone' + (d.kind === 'home' ? ' phone--home' : d.kind === 'punch' ? ' phone--punch' : '');
+    $('#screen').style.width = d.w + 'px'; $('#screen').style.height = d.h + 'px';
+    var padX = d.kind === 'home' ? 32 : d.kind === 'punch' ? 20 : 24, padY = d.kind === 'home' ? 170 : d.kind === 'punch' ? 20 : 24;
+    var stage = $('#stage'), pw = d.w + padX, phH = d.h + padY;
+    var s = st.zoom === 'fit' ? Math.min(1, (stage.clientHeight - 80) / phH, (stage.clientWidth - 40) / pw) : 1;
+    $('#holder').style.transform = 'scale(' + s.toFixed(3) + ')';
+    $('#meta-device').innerHTML = '<b>' + d.name + '</b> · ' + d.w + ' × ' + (d.h - d.top - d.bottom) + ' px usable · ' + Math.round(s * 100) + '%';
+  }
+
+  /* ---------- load the app ---------- */
+  function clockLabel() {
+    var v = clockValue();
+    if (!v || v === 'real') { var n = new Date(); return { t: n.toTimeString().slice(0, 5), s: v === 'real' ? 'Real clock' : 'Clock from config/users.js' }; }
+    var d = new Date(v);
+    var t = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(d);
+    var day = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Shanghai' }).format(d);
+    return { t: t, s: 'Preview clock: ' + day + ' ' + t + ' Shanghai' };
+  }
+  function loadApp(msg) {
+    pending = msg || null;
+    var c = clockLabel();
+    $('#sb-time').textContent = c.t; $('#meta-status').textContent = c.s;
+    frame.name = 'flcnow=' + encodeURIComponent(clockValue() || '');
+    if (APP_HTML) frame.srcdoc = APP_HTML;
+    else frame.src = 'index.html?v=' + Date.now() + (clockValue() ? '&now=' + encodeURIComponent(clockValue()) : '') + '#/' + (st.route || 'home');
+    $('#open').href = 'index.html' + (clockValue() ? '?now=' + encodeURIComponent(clockValue()) : '') + '#/' + (st.route || 'home');
+  }
+
+  /* ---------- auto refresh when files change (local server / GitHub only) ---------- */
+  var WATCH = ['index.html', 'css/app.css', 'js/app.js', 'js/admin.js', 'data/content.js', 'config/users.js', 'data/live.json', 'data/attendees.json'];
+  var sig = null;
+  function signature() {
+    return Promise.all(WATCH.map(function (f) {
+      return fetch(f + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; });
+    })).then(function (texts) { return texts.map(function (t) { var h = 0; for (var i = 0; i < t.length; i++) h = (h * 31 + t.charCodeAt(i)) | 0; return h + ':' + t.length; }).join('|'); });
+  }
+  function watch() {
+    if (!st.auto || APP_HTML || isFile) return;
+    signature().then(function (s) { if (sig && s !== sig) { loadApp(); $('#meta-status').textContent = 'Refreshed after a file change'; } sig = s; });
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-dev')) { st.device = b.getAttribute('data-dev'); save(); drawControls(); layout(); send({ flc: 'insets' }); return; }
+    if (b.hasAttribute('data-route')) { st.route = b.getAttribute('data-route'); save(); send({ flc: 'go', route: st.route }); return; }
+    if (b.hasAttribute('data-user')) { st.user = b.getAttribute('data-user'); st.route = /admin/i.test(st.user) ? 'admin' : 'home'; save(); drawControls(); send({ flc: 'signin', user: st.user, route: st.route }); return; }
+    if (b.hasAttribute('data-zoom')) { st.zoom = b.getAttribute('data-zoom'); save(); drawControls(); layout(); return; }
+  });
+  function applyClock() { var c = clockLabel(); $('#sb-time').textContent = c.t; $('#meta-status').textContent = c.s; send({ flc: 'clock' }); }
+  $('#clock').addEventListener('change', function () { st.clock = this.value; save(); drawControls(); applyClock(); });
+  $('#clock-custom').addEventListener('change', function () { st.custom = this.value; save(); applyClock(); });
+  $('#auto').addEventListener('change', function () { st.auto = this.checked; save(); });
+  $('#reload').addEventListener('click', function () { loadApp(); });
+  $('#reset').addEventListener('click', function () { st.user = ''; st.route = 'home'; save(); drawControls(); send({ flc: 'reset' }); });
+  $('#signout').addEventListener('click', function () { st.user = ''; st.route = 'home'; save(); drawControls(); send({ flc: 'signout' }); });
+  $('#story').addEventListener('click', function () { if (!st.user) st.user = 'Guest'; save(); drawControls(); send({ flc: 'story', user: st.user }); });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'r' || e.key === 'R') && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName) && !e.metaKey && !e.ctrlKey) { e.preventDefault(); $('#reload').click(); }
+  });
+  window.addEventListener('resize', layout);
+
+  drawControls(); layout(); loadApp();
+  setInterval(watch, 1500); watch();
+})();
+</script>
+<!--BUILD:BODY-END-->
+</body>
+</html>
