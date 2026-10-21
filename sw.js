@@ -1,6 +1,6 @@
 /* FLC 2026 offline cache.
    Bump VERSION whenever you change content, images or code so phones pick up the update. */
-const VERSION = 'flc-2027-v7';
+const VERSION = 'flc-2027-v6';
 const ASSETS = [
   './',
   './assets/fonts/barlow-condensed-latin-500-normal.woff2',
