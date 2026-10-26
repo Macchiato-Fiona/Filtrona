@@ -1,0 +1,30 @@
+{
+  "updated": "2026-10-26T10:09:15.991Z",
+  "notices": [
+    {
+      "id": "nmvp3h5g7",
+      "text": "Test Announcement",
+      "level": "info",
+      "created": "2026-10-26T10:09:15.991Z",
+      "expires": "2026-10-26T12:09:15.991Z"
+    },
+    {
+      "id": "nmvp37bax",
+      "text": "TEST Notification",
+      "level": "info",
+      "created": "2026-10-26T10:01:37.017Z",
+      "expires": "2026-10-26T10:05:11.507Z"
+    },
+    {
+      "id": "nmvp36gol",
+      "text": "This is an event change TEST",
+      "level": "info",
+      "created": "2026-10-26T10:00:57.333Z",
+      "expires": "2026-10-26T10:05:12.214Z"
+    }
+  ],
+  "agenda": {
+    "overrides": {},
+    "added": []
+  }
+}
