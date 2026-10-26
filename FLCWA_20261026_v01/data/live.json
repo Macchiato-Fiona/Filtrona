@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-26T11:29:53.090Z",
+  "updated": "2026-10-26T11:31:31.160Z",
   "notices": [
     {
       "id": "nmvp6cts2",
@@ -13,7 +13,7 @@
       "text": "Test announcement",
       "level": "info",
       "created": "2026-10-26T11:19:36.367Z",
-      "expires": "2026-10-26T13:19:36.367Z"
+      "expires": "2026-10-26T11:31:31.160Z"
     }
   ],
   "agenda": {
