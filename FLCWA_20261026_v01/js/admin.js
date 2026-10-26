@@ -15,17 +15,20 @@ window.FLC_ADMIN = function (A) {
 
   /* ---------- GitHub connection ---------- */
   function detect() {
-    var h = location.hostname, owner = '', repo = '';
+    /* https://<owner>.github.io/<repo>/<folder…>/index.html → owner, repo, folder */
+    var h = location.hostname, owner = '', repo = '', folder = '';
     if (/\.github\.io$/i.test(h)) {
       owner = h.split('.')[0];
-      var seg = location.pathname.split('/').filter(Boolean)[0];
-      repo = seg && !/\.html?$/i.test(seg) ? seg : h;
+      var segs = location.pathname.split('/').filter(Boolean);
+      if (segs.length && /\.html?$/i.test(segs[segs.length - 1])) segs.pop();
+      if (segs.length) { repo = segs.shift(); folder = segs.join('/'); } else repo = h;
     }
-    return { owner: owner, repo: repo };
+    return { owner: owner, repo: repo, folder: folder };
   }
   function gh() {
     var c = store.get('flc.admin.gh', {}), d = detect(), s = (A.SET.github || {});
-    return { owner: c.owner || s.owner || d.owner, repo: c.repo || s.repo || d.repo, branch: c.branch || s.branch || 'main', token: c.token || '' };
+    var folder = c.folder != null && c.folder !== '' ? c.folder : (s.folder || d.folder || '');
+    return { owner: c.owner || s.owner || d.owner, repo: c.repo || s.repo || d.repo, branch: c.branch || s.branch || 'main', folder: folder.replace(/^\/+|\/+$/g, ''), token: c.token || '' };
   }
   function connected() { var g = gh(); return !!(g.token && g.owner && g.repo); }
   function b64(str) {
@@ -46,7 +49,7 @@ window.FLC_ADMIN = function (A) {
     return 'GitHub returned an error (' + status + '). Try again in a minute.';
   }
   function ghPut(path, obj, message, retried) {
-    var g = gh(), url = '/contents/' + path;
+    var g = gh(), url = '/contents/' + (g.folder ? g.folder.split('/').map(encodeURIComponent).join('/') + '/' : '') + path;
     return api(url + '?ref=' + encodeURIComponent(g.branch)).then(function (r) {
       if (r.status === 404) return null;
       if (!r.ok) throw new Error(explain(r.status));
@@ -117,7 +120,7 @@ window.FLC_ADMIN = function (A) {
     var g = gh(), on = connected();
     var head = '<section class="admin-hero"><p class="eyebrow" style="color:var(--green)">Admin</p><h1>Conference control</h1>' +
       '<p>Send notices, change the agenda and keep the attendee list up to date.</p>' +
-      (on ? '<span class="status-pill status-pill--ok">' + icon('check', 'icon--xs') + 'Publishing to ' + esc(g.owner + '/' + g.repo) + '</span>'
+      (on ? '<span class="status-pill status-pill--ok">' + icon('check', 'icon--xs') + 'Publishing to ' + esc(g.owner + '/' + g.repo + (g.folder ? '/' + g.folder : '') + ' · ' + g.branch) + '</span>'
           : '<span class="status-pill status-pill--off">' + icon('alert', 'icon--xs') + 'Not connected · changes stay on this phone</span>') + '</section>';
     var tabs = [['notices', 'Notices'], ['agenda', 'Agenda'], ['people', 'Attendees'], ['setup', 'Setup']];
     var seg = '<div style="padding-top:14px"><div class="seg seg--wide" role="group" aria-label="Admin sections">' + tabs.map(function (t) { return '<button type="button" data-adm-tab="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div></div>';
@@ -285,7 +288,8 @@ window.FLC_ADMIN = function (A) {
       '<form class="login__form" data-adm-form="gh" novalidate>' +
       '<div class="grid-2"><label class="field" for="adm-owner"><span class="field__label">GitHub user</span><input id="adm-owner" value="' + esc(g.owner) + '" autocapitalize="off" spellcheck="false" placeholder="your-username"></label>' +
       '<label class="field" for="adm-repo"><span class="field__label">Repository</span><input id="adm-repo" value="' + esc(g.repo) + '" autocapitalize="off" spellcheck="false" placeholder="flc-2027"></label></div>' +
-      '<label class="field" for="adm-branch"><span class="field__label">Branch</span><input id="adm-branch" value="' + esc(g.branch) + '" autocapitalize="off" spellcheck="false"></label>' +
+      '<div class="grid-2"><label class="field" for="adm-branch"><span class="field__label">Branch</span><input id="adm-branch" value="' + esc(g.branch) + '" autocapitalize="off" spellcheck="false"></label>' +
+      '<label class="field" for="adm-folder"><span class="field__label">App folder</span><input id="adm-folder" value="' + esc(g.folder) + '" autocapitalize="off" spellcheck="false" placeholder="(repository root)"></label></div>' +
       '<label class="field" for="adm-token"><span class="field__label">Access token</span><input id="adm-token" type="password" value="' + esc(g.token) + '" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"></label>' +
       '<button type="submit" class="btn btn--primary btn--block" data-adm-busy>Save and test</button>' +
       (g.token ? '<button type="button" class="btn btn--line btn--block" data-adm-forget>Remove token from this phone</button>' : '') + '</form>' +
@@ -315,7 +319,7 @@ window.FLC_ADMIN = function (A) {
   function saveGh() {
     var c = {
       owner: document.getElementById('adm-owner').value.trim(), repo: document.getElementById('adm-repo').value.trim(),
-      branch: document.getElementById('adm-branch').value.trim() || 'main', token: document.getElementById('adm-token').value.trim()
+      branch: document.getElementById('adm-branch').value.trim() || 'main', folder: document.getElementById('adm-folder').value.trim(), token: document.getElementById('adm-token').value.trim()
     };
     store.set('flc.admin.gh', c);
     if (!c.token || !c.owner || !c.repo) { A.rerender(); A.toast('Saved. Add the user, repository and token to publish.'); return; }

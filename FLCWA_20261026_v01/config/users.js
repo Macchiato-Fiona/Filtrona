@@ -26,12 +26,13 @@ window.FLC_USERS = [
    previewNow:   null = real time. To rehearse the live "Now & Next" view,
                  set an event-time timestamp, e.g. "2027-01-19T10:20:00+08:00".
    pollSeconds:  how often open phones check for new notices and agenda edits.
-   github:       where the Admin page publishes. Leave owner/repo empty to
-                 auto-detect from the github.io address.
+   github:       where the Admin page publishes. Owner, repository and app
+                 folder are read from the github.io address automatically;
+                 branch must match the branch GitHub Pages publishes from.
 ------------------------------------------------------------------- */
 window.FLC_SETTINGS = {
   previewNow: null,
   showOnboarding: true,
   pollSeconds: 60,
-  github: { owner: "", repo: "", branch: "main" }
+  github: { owner: "Macchiato-Fiona", repo: "Filtrona", branch: "webapps", folder: "" }
 };
