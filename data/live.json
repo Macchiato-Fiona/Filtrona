@@ -1,0 +1,16 @@
+{
+  "updated": "2026-10-26T11:16:47.488Z",
+  "notices": [
+    {
+      "id": "nmvp3h5g7",
+      "text": "Test Announcement",
+      "level": "info",
+      "created": "2026-10-26T10:09:15.991Z",
+      "expires": "2026-10-26T11:16:47.488Z"
+    }
+  ],
+  "agenda": {
+    "overrides": {},
+    "added": []
+  }
+}
