@@ -1,6 +1,13 @@
 {
-  "updated": "2026-10-27T02:25:55.210Z",
+  "updated": "2026-10-27T02:27:27.499Z",
   "notices": [
+    {
+      "id": "nmvq2f43v",
+      "text": "Event Change Announcement (Test 1027_3)",
+      "level": "info",
+      "created": "2026-10-27T02:27:27.499Z",
+      "expires": "2026-10-27T04:27:27.499Z"
+    },
     {
       "id": "nmvq2d4wa",
       "text": "Event Change Announcement (Test 1027_2)",
