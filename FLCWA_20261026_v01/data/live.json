@@ -1,0 +1,58 @@
+{
+  "updated": "2026-10-27T03:40:14.552Z",
+  "notices": [
+    {
+      "id": "nmvq4ydhl",
+      "text": "Test Event Change (Test009)",
+      "level": "info",
+      "created": "2026-10-27T03:38:25.353Z",
+      "expires": "2026-10-27T05:38:25.353Z"
+    },
+    {
+      "id": "nmvq352xh",
+      "text": "Event Change Announcement (Test 1027_4)",
+      "level": "info",
+      "created": "2026-10-27T02:47:39.029Z",
+      "expires": "2026-10-27T04:47:39.029Z"
+    },
+    {
+      "id": "nmvq2f43v",
+      "text": "Event Change Announcement (Test 1027_3)",
+      "level": "info",
+      "created": "2026-10-27T02:27:27.499Z",
+      "expires": "2026-10-27T03:40:14.552Z"
+    },
+    {
+      "id": "nmvq2d4wa",
+      "text": "Event Change Announcement (Test 1027_2)",
+      "level": "info",
+      "created": "2026-10-27T02:25:55.210Z",
+      "expires": "2026-10-27T02:51:32.596Z"
+    },
+    {
+      "id": "nmvq230y4",
+      "text": "Event Change Announcement (Test 1027)",
+      "level": "info",
+      "created": "2026-10-27T02:18:03.532Z",
+      "expires": "2026-10-27T02:45:37.847Z"
+    },
+    {
+      "id": "nmvp6cts2",
+      "text": "Test Announcement 2",
+      "level": "info",
+      "created": "2026-10-26T11:29:53.090Z",
+      "expires": "2026-10-26T11:32:50.999Z"
+    },
+    {
+      "id": "nmvp5zlwv",
+      "text": "Test announcement",
+      "level": "info",
+      "created": "2026-10-26T11:19:36.367Z",
+      "expires": "2026-10-26T11:31:31.160Z"
+    }
+  ],
+  "agenda": {
+    "overrides": {},
+    "added": []
+  }
+}

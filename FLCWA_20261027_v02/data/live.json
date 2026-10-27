@@ -1,0 +1,30 @@
+{
+  "updated": "2026-10-27T03:44:35.251Z",
+  "notices": [
+    {
+      "id": "nmvq56awj",
+      "text": "Event Change Announcement (Test010)",
+      "level": "info",
+      "created": "2026-10-27T03:44:35.251Z",
+      "expires": "2026-10-27T05:44:35.251Z"
+    },
+    {
+      "id": "nmvq4ydhl",
+      "text": "Test Event Change (Test009)",
+      "level": "info",
+      "created": "2026-10-27T03:38:25.353Z",
+      "expires": "2026-10-27T03:44:11.968Z"
+    },
+    {
+      "id": "nmvq352xh",
+      "text": "Event Change Announcement (Test 1027_4)",
+      "level": "info",
+      "created": "2026-10-27T02:47:39.029Z",
+      "expires": "2026-10-27T03:44:07.317Z"
+    }
+  ],
+  "agenda": {
+    "overrides": {},
+    "added": []
+  }
+}
